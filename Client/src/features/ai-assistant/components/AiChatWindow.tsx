@@ -115,7 +115,7 @@ export function AiChatWindow() {
           {/* Welcome View */}
           <div className="flex flex-col items-center justify-center">
             <div className="relative">
-              <AiOrb />
+              <AiOrb animated />
             </div>
             <div className="text-white drop-shadow-md">
               <WelcomeHeader

@@ -1,14 +1,25 @@
 import apiClient from "@/lib/api-client";
-import { LoginCredentials, MutationResponse } from "@/types/api/auth";
-import { User } from "@/types/api/user";
+import { setAccessToken } from "@/lib/auth-token";
+import {
+  LoginCredentials,
+  LoginResponse,
+  MutationResponse,
+} from "@/types/api/auth";
 import axios from "axios";
 
 export const login = async (
   credentials: LoginCredentials
-): Promise<MutationResponse<User>> => {
+): Promise<MutationResponse<LoginResponse>> => {
   try {
-    const response = await apiClient.post<User>("/auth/login", credentials);
+    const response = await apiClient.post<LoginResponse>(
+      "/auth/login",
+      credentials
+    );
     console.log("Login response:", response);
+
+    if (response.data?.accessToken) {
+      setAccessToken(response.data.accessToken);
+    }
 
     return { status: response.status, data: response.data };
   } catch (error) {

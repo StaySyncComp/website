@@ -10,13 +10,15 @@ import { memo } from "react";
  * @param animated - If true, enables rotating color animation (default: false)
  */
 export const AiOrb = memo<{ className?: string; animated?: boolean }>(
-  ({ className = "w-40 h-40", animated = true }) => {
+  ({ className = "w-40 h-40", animated = false }) => {
     return (
-      <div className="orb-container relative inline-block">
+      <div
+        className={`orb-container relative inline-block shrink-0 rounded-full overflow-hidden bg-transparent ${className}`}
+      >
         {/* Add animation styles when animated prop is true */}
         {animated && (
           <style>{`
-            @keyframes rotateColors {
+            @keyframes orb-rotate-colors {
               from {
                 transform: rotate(0deg);
               }
@@ -29,39 +31,42 @@ export const AiOrb = memo<{ className?: string; animated?: boolean }>(
 
         {/* The Orb SVG */}
         <svg
-          className={`orb-svg ${className}`}
+          className="orb-svg size-full"
           width="161"
           height="161"
           viewBox="0 0 161 161"
           fill="none"
+          overflow="hidden"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <g filter="url(#filter0_f_2406_16701)">
-            <g clipPath="url(#paint0_angular_2406_16701_clip_path)">
-              <g transform="matrix(0 0.0530513 -0.0530513 0 80.0763 80.0762)">
-                <foreignObject
-                  x="-1011.07"
-                  y="-1011.07"
-                  width="2022.15"
-                  height="2022.15"
-                >
-                  <div
-                    style={{
-                      background:
-                        "conic-gradient(from 90deg,rgba(59, 130, 246, 1) 0deg,rgba(255, 255, 255, 1) 120.6deg,rgba(99, 102, 241, 1) 250.2deg,rgba(6, 182, 212, 1) 360deg)",
-                      height: "100%",
-                      width: "100%",
-                      opacity: 0.2,
-                      animation: animated
-                        ? "rotateColors 8s linear infinite"
-                        : "none",
-                    }}
-                  />
-                </foreignObject>
+          {animated && (
+            <g filter="url(#filter0_f_2406_16701)">
+              <g clipPath="url(#paint0_angular_2406_16701_clip_path)">
+                <g transform="matrix(0 0.0530513 -0.0530513 0 80.0763 80.0762)">
+                  <foreignObject
+                    x="-1011.07"
+                    y="-1011.07"
+                    width="2022.15"
+                    height="2022.15"
+                  >
+                    <div
+                      className="orb-rotating-gradient"
+                      style={{
+                        background:
+                          "conic-gradient(from 90deg,rgba(59, 130, 246, 1) 0deg,rgba(255, 255, 255, 1) 120.6deg,rgba(99, 102, 241, 1) 250.2deg,rgba(6, 182, 212, 1) 360deg)",
+                        height: "100%",
+                        width: "100%",
+                        opacity: 0.2,
+                        transformOrigin: "50% 50%",
+                        animation: "orb-rotate-colors 8s linear infinite",
+                      }}
+                    />
+                  </foreignObject>
+                </g>
               </g>
+              <circle cx="80.0763" cy="80.0762" r="53.0513" />
             </g>
-            <circle cx="80.0763" cy="80.0762" r="53.0513" />
-          </g>
+          )}
           <g clipPath="url(#clip0_2406_16701)">
             <g clipPath="url(#clip1_2406_16701)">
               <rect

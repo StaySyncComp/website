@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
+import { clearAccessToken } from "@/lib/auth-token";
 import { User } from "@/types/api/user";
-import { LoginCredentials, MutationResponse } from "@/types/api/auth";
+import { LoginCredentials, LoginResponse, MutationResponse } from "@/types/api/auth";
 import { fetchUser } from "@/features/organization/api/users/fetchUser";
 import { login } from "@/features/auth/api";
 import { toast } from "sonner";
@@ -15,7 +16,11 @@ export function useAuth() {
     retry: false,
   });
 
-  const loginMutation = useMutation<MutationResponse, Error, LoginCredentials>({
+  const loginMutation = useMutation<
+    MutationResponse<LoginResponse>,
+    Error,
+    LoginCredentials
+  >({
     mutationFn: login,
 
     onSuccess: () => {
@@ -36,6 +41,7 @@ export function useAuth() {
   const logout = useMutation<void, Error>({
     mutationFn: () => apiClient.post("/auth/logout"),
     onSuccess: () => {
+      clearAccessToken();
       queryClient.setQueryData(["user"], null);
     },
   });
