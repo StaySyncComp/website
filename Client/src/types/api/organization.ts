@@ -4,6 +4,8 @@ export interface Organization {
   logo: string;
   OrganizationRole: OrganizationRole;
   customStyles?: CustomStyles;
+  twilioWhatsAppNumber?: string | null;
+  whatsappEnabled?: boolean;
 }
 
 export interface OrganizationRole {
@@ -31,6 +33,8 @@ export interface UpdateOrganizationPayload {
   name: string;
   logo?: string;
   customStyles?: CustomStyles;
+  twilioWhatsAppNumber?: string | null;
+  whatsappEnabled?: boolean;
 }
 
 export interface GetOrganizationPayload {

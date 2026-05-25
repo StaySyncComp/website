@@ -119,10 +119,19 @@ export default function GuestChatWindow() {
     setInput("");
     setIsLoading(true);
 
+    const orgId = organization?.id;
+    if (!orgId) {
+      setMessages((prev) => [
+        ...prev,
+        { text: "לא ניתן לזהות את המלון. פתחו שוב את הקישור מהחדר.", sender: "bot" },
+      ]);
+      setIsLoading(false);
+      return;
+    }
+
     const res = await apiClient.post("/ai/request-guest", {
       prompt,
-      guest_data: { organizationId: 1 },
-      organizationId: 1,
+      organizationId: orgId,
       conversationId,
     });
 

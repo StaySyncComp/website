@@ -10,6 +10,7 @@ import Departments from "@/features/organization/components/Departments";
 import Roles from "@/features/organization/components/Roles";
 import Locations from "@/features/organization/components/Locations";
 import AiChat from "@/features/organization/components/ai-chat-settings";
+import WhatsAppSettings from "@/features/organization/components/whatsapp-settings";
 import { useTranslation } from "react-i18next";
 import SettingsBreadcrumbs from "@/features/organization/components/SettingsBreadcrumbs";
 import { useHasScopedAccess } from "@/lib/api-utils/hasScopedAccess";
@@ -144,8 +145,9 @@ function OrganizationSettings() {
           <TabsContent value="general">
             <GeneralSettings />
           </TabsContent>
-          <TabsContent value="ai">
+          <TabsContent value="ai" className="flex flex-col gap-10">
             <AiChat />
+            <WhatsAppSettings />
           </TabsContent>
           {canAccessDepartments && (
             <TabsContent value="departments">
