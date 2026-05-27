@@ -14,7 +14,7 @@ import OrganizationSettings from "@/pages/OrganizationSettings";
 import SettingsIcon from "@/assets/icons/SettingsIcon";
 import Calls from "@/pages/Calls";
 import Reports from "@/pages/Reports";
-import ChatbotLauncher from "@/features/guest/components/ChatBotLauncher";
+import FloatingAssistButtons from "@/components/common/FloatingAssistButtons";
 import Home from "@/pages/Home";
 import ChatGuestPage from "@/pages/Guest";
 import PublicInfoPage from "@/pages/PublicInfoPage";
@@ -23,7 +23,6 @@ import CallDetails from "@/features/calls/components/CallDetails";
 import UnauthorizedPage from "@/pages/errors/UnauthorizedPage";
 import NotFoundPage from "@/pages/errors/NotFoundPage";
 import Homepage from "@/pages/HomePage";
-import AccessibilityLauncher from "@/components/common/accessibility/AccessibilityLauncher";
 import AccessibilityStatement from "@/pages/AccessibilityStatement/AccessibilityStatement";
 import PrivacyPolicy from "@/pages/PrivacyPolicy/PrivacyPolicy";
 import PublicLayout from "@/components/layout/Public/Layout";
@@ -94,8 +93,7 @@ export const router = createBrowserRouter([
     element: (
       <Layout>
         <PrivateRoute />
-        <AccessibilityLauncher />
-        <ChatbotLauncher />
+        <FloatingAssistButtons />
       </Layout>
     ),
     handle: { showInSidebar: true },

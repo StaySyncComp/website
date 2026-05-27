@@ -13,9 +13,11 @@ import { useInfoPage } from "@/features/organization/hooks/useInfoPage";
 import { normalizePuckData } from "./puck/normalizePuckData";
 import InfoPageSharePanel from "./InfoPageSharePanel";
 import EditorToolbar from "./EditorToolbar";
+import PreviewModeSwitch, { type PreviewMode } from "./PreviewModeSwitch";
 import TemplatePicker from "./TemplatePicker";
 import { Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const PuckEditor = lazy(() => import("./PuckEditor"));
 
@@ -53,6 +55,7 @@ export default function InfoPageEditor({
 
   const [editorData, setEditorData] = useState<Data>(serverDraft);
   const [pageTitle, setPageTitle] = useState(infoPage?.title ?? "");
+  const [previewMode, setPreviewMode] = useState<PreviewMode>("web");
   const [isDirty, setIsDirty] = useState(false);
   const [titleDirty, setTitleDirty] = useState(false);
 
@@ -181,10 +184,20 @@ export default function InfoPageEditor({
           templateContext={templateContext}
         />
 
-        <div className="min-h-[600px] [&_.Puck]:!min-h-[600px]">
+        <PreviewModeSwitch
+          mode={previewMode}
+          onModeChange={setPreviewMode}
+        />
+
+        <div
+          className={cn(
+            "info-page-puck-editor",
+            previewMode === "mobile" && "info-page-puck-editor--mobile"
+          )}
+        >
           <Suspense
             fallback={
-              <div className="flex items-center justify-center min-h-[600px]">
+              <div className="flex items-center justify-center min-h-[calc(100vh-240px)]">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
             }
@@ -195,12 +208,20 @@ export default function InfoPageEditor({
               onChange={handleChange}
               headerTitle={pageTitle}
               headerPath={organizationName}
+              previewMode={previewMode}
             />
           </Suspense>
         </div>
       </div>
 
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-surface rounded-2xl shadow-xl px-4 py-3 w-fit border z-50">
+      <div
+        className={cn(
+          "bg-surface rounded-2xl shadow-xl px-4 py-3 border z-50",
+          previewMode === "mobile"
+            ? "relative mx-auto mt-4 flex w-full justify-center"
+            : "fixed bottom-6 left-1/2 -translate-x-1/2 w-fit"
+        )}
+      >
         <div className="flex flex-wrap items-center gap-3 md:gap-6">
           {hasUnsaved && (
             <span className="text-sm font-medium">

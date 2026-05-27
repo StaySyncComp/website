@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { GetTextDirection } from "@/lib/i18n";
 import "@/app/styles/accessibility.css";
 
 interface AccessibilityMenuProps {
@@ -29,6 +30,7 @@ const defaultSettings: AccessibilitySettings = {
 
 export default function AccessibilityMenu({ onClose }: AccessibilityMenuProps) {
   const { t } = useTranslation();
+  const dir = GetTextDirection();
 
   const handleFontSizeChange = (size: "small" | "medium" | "large") => {
     document.documentElement.style.fontSize = {
@@ -101,10 +103,11 @@ export default function AccessibilityMenu({ onClose }: AccessibilityMenuProps) {
 
   return (
     <motion.div
+      dir={dir}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
-      className="absolute bottom-20 rtl:left-0 ltr:right-0 mb-2 w-80 bg-surface dark:bg-gray-800 rounded-lg shadow-xl p-4 max-h-[80vh] overflow-y-auto"
+      className="absolute bottom-full rtl:left-0 ltr:right-0 mb-3 w-80 bg-surface dark:bg-gray-800 rounded-lg shadow-xl p-4 max-h-[80vh] overflow-y-auto text-start"
     >
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-surface">
@@ -150,35 +153,35 @@ export default function AccessibilityMenu({ onClose }: AccessibilityMenuProps) {
         <div className="space-y-2">
           <button
             onClick={() => handleToggle("highContrast", "high-contrast")}
-            className="w-full px-4 py-2 text-sm text-left rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
+            className="w-full px-4 py-2 text-sm text-start rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
           >
             {t("accessibility.toggleHighContrast")}
           </button>
 
           <button
             onClick={() => handleToggle("cursorLarge", "cursor-large")}
-            className="w-full px-4 py-2 text-sm text-left rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
+            className="w-full px-4 py-2 text-sm text-start rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
           >
             {t("accessibility.toggleLargeCursor")}
           </button>
 
           <button
             onClick={() => handleToggle("highlightLinks", "highlight-links")}
-            className="w-full px-4 py-2 text-sm text-left rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
+            className="w-full px-4 py-2 text-sm text-start rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
           >
             {t("accessibility.toggleHighlightLinks")}
           </button>
 
           <button
             onClick={() => handleToggle("readableDesign", "readable-design")}
-            className="w-full px-4 py-2 text-sm text-left rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
+            className="w-full px-4 py-2 text-sm text-start rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
           >
             {t("accessibility.toggleReadableDesign")}
           </button>
 
           <button
             onClick={() => handleToggle("stopAnimations", "stop-animations")}
-            className="w-full px-4 py-2 text-sm text-left rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
+            className="w-full px-4 py-2 text-sm text-start rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
           >
             {t("accessibility.toggleStopAnimations")}
           </button>
@@ -187,7 +190,7 @@ export default function AccessibilityMenu({ onClose }: AccessibilityMenuProps) {
             onClick={() =>
               handleToggle("keyboardOnly", "keyboard-navigation-only")
             }
-            className="w-full px-4 py-2 text-sm text-left rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
+            className="w-full px-4 py-2 text-sm text-start rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
           >
             {t("accessibility.toggleKeyboardOnly")}
           </button>
@@ -197,14 +200,14 @@ export default function AccessibilityMenu({ onClose }: AccessibilityMenuProps) {
         <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={resetSettings}
-            className="w-full px-4 py-2 text-sm text-left rounded bg-red-100 hover:bg-red-200 text-red-700 mb-2"
+            className="w-full px-4 py-2 text-sm text-start rounded bg-red-100 hover:bg-red-200 text-red-700 mb-2"
           >
             {t("accessibility.resetSettings")}
           </button>
 
           <a
             href="/accessibility-statement"
-            className="block w-full px-4 py-2 text-sm text-left rounded bg-gray-100 hover:bg-gray-200 text-gray-700"
+            className="block w-full px-4 py-2 text-sm text-start rounded bg-gray-100 hover:bg-gray-200 text-gray-700"
           >
             {t("accessibility.viewStatement")}
           </a>

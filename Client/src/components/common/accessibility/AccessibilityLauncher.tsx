@@ -11,10 +11,10 @@ export default function AccessibilityLauncher() {
   };
 
   return (
-    <div className="fixed bottom-20 rtl:left-6 ltr:right-6 z-50">
+    <div className="relative">
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="w-10 h-10 shadow-lg rounded-full flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-surface"
+        className="size-12 shadow-lg rounded-full flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-surface ring-1 ring-black/5 hover:shadow-xl transition-shadow"
         aria-label="Open accessibility menu"
       >
         <AccessibilityIcon className="w-6 h-6" />
