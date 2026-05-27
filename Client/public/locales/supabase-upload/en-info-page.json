@@ -1,0 +1,30 @@
+{
+  "information_page": "Information page",
+  "info_page_share_title": "Share your information page",
+  "info_page_share_description": "Share the link or QR code with guests. The page is public and does not require login.",
+  "info_page_not_published_hint": "Publish the page to make the link and QR code available to guests.",
+  "info_page_public_url": "Public URL",
+  "info_page_view_live": "View live page",
+  "info_page_qr_code": "QR code",
+  "info_page_unsaved_changes": "You have unsaved changes",
+  "save_draft": "Save draft",
+  "publish": "Publish",
+  "unpublish": "Unpublish",
+  "copy": "Copy",
+  "copied": "Copied",
+  "info_page_draft_saved": "Draft saved",
+  "info_page_save_error": "Failed to save draft",
+  "info_page_published": "Page published successfully",
+  "info_page_publish_error": "Failed to publish page",
+  "info_page_unpublished": "Page unpublished",
+  "info_page_unpublish_error": "Failed to unpublish page",
+  "info_page_invalid_link": "Invalid link",
+  "info_page_not_found_title": "Page not found",
+  "info_page_not_found_description": "This page may not be published yet or the link is incorrect.",
+  "info_page_loading": "Loading editor...",
+  "info_page_load_error": "Could not load the information page editor. Ensure the server is up to date and try again.",
+  "retry": "Try again",
+  "website_titles": {
+    "information_page": "Information page"
+  }
+}
