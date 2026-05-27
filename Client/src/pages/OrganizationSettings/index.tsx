@@ -1,4 +1,5 @@
-import { useEffect, useMemo } from "react";
+import { lazy, Suspense, useEffect, useMemo } from "react";
+import { Loader2 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
@@ -11,6 +12,9 @@ import Roles from "@/features/organization/components/Roles";
 import Locations from "@/features/organization/components/Locations";
 import AiChat from "@/features/organization/components/ai-chat-settings";
 import WhatsAppSettings from "@/features/organization/components/whatsapp-settings";
+const InfoPageSettings = lazy(
+  () => import("@/features/organization/components/InfoPageSettings")
+);
 import { useTranslation } from "react-i18next";
 import SettingsBreadcrumbs from "@/features/organization/components/SettingsBreadcrumbs";
 import { useHasScopedAccess } from "@/lib/api-utils/hasScopedAccess";
@@ -43,7 +47,7 @@ function OrganizationSettings() {
   const activeSubTab = searchParams.get("subtab");
 
   const validTabs = useMemo(() => {
-    const tabs = ["general", "ai"];
+    const tabs = ["general", "ai", "info"];
     if (canAccessDepartments) tabs.push("departments");
     if (canAccessCalls) tabs.push("calls");
     if (canAccessRoles) tabs.push("roles");
@@ -79,8 +83,10 @@ function OrganizationSettings() {
     ];
 
     if (activeTab && activeTab !== "general") {
+      const tabLabelKey =
+        activeTab === "info" ? "information_page" : activeTab;
       crumbs.push({
-        label: t(activeTab),
+        label: t(tabLabelKey),
         href: `/organization-settings?tab=${activeTab}`,
       });
     }
@@ -94,9 +100,12 @@ function OrganizationSettings() {
 
   const breadcrumbCrumbs = getBreadcrumbs();
 
+  const pageTitleKey =
+    activeSubTab || (activeTab === "info" ? "information_page" : activeTab);
+
   return (
     <div className="mx-auto h-full flex flex-col">
-      <h1 className="heading text-2xl mb-1">{t(activeSubTab || activeTab)}</h1>
+      <h1 className="heading text-2xl mb-1">{t(pageTitleKey)}</h1>
       <div className="pb-6">
         <SettingsBreadcrumbs crumbs={breadcrumbCrumbs} />
       </div>
@@ -114,6 +123,9 @@ function OrganizationSettings() {
             </TabsTrigger>
             <TabsTrigger variant={"outline"} value="ai">
               {t("ai")}
+            </TabsTrigger>
+            <TabsTrigger variant={"outline"} value="info">
+              {t("information_page")}
             </TabsTrigger>
             {canAccessDepartments && (
               <TabsTrigger variant={"outline"} value="departments">
@@ -148,6 +160,19 @@ function OrganizationSettings() {
           <TabsContent value="ai" className="flex flex-col gap-10">
             <AiChat />
             <WhatsAppSettings />
+          </TabsContent>
+          <TabsContent value="info" className="flex flex-col flex-1">
+            {activeTab === "info" && (
+              <Suspense
+                fallback={
+                  <div className="flex justify-center py-20">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                }
+              >
+                <InfoPageSettings />
+              </Suspense>
+            )}
           </TabsContent>
           {canAccessDepartments && (
             <TabsContent value="departments">

@@ -17,6 +17,7 @@ import Reports from "@/pages/Reports";
 import ChatbotLauncher from "@/features/guest/components/ChatBotLauncher";
 import Home from "@/pages/Home";
 import ChatGuestPage from "@/pages/Guest";
+import PublicInfoPage from "@/pages/PublicInfoPage";
 import AddCall from "@/features/calls/components/AddCall";
 import CallDetails from "@/features/calls/components/CallDetails";
 import UnauthorizedPage from "@/pages/errors/UnauthorizedPage";
@@ -50,6 +51,11 @@ export const router = createBrowserRouter([
         path: "/chat",
         element: <ChatGuestPage />,
         handle: { documentTitle: "chat" },
+      },
+      {
+        path: "/info/:organizationId",
+        element: <PublicInfoPage />,
+        handle: { documentTitle: "information_page" },
       },
       {
         path: "/create-organization",
