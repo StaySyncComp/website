@@ -1,0 +1,272 @@
+/* -------------------------------------------------------------------------- *
+ * Puck preview integration
+ * -------------------------------------------------------------------------- */
+
+.info-page-puck-editor {
+  --info-page-puck-height: clamp(560px, 75vh, 880px);
+  --info-page-iphone-frame-width: 390px;
+  --info-page-iphone-screen-height: 736px;
+  height: var(--info-page-puck-height);
+  display: flex;
+  flex-direction: column;
+}
+
+.info-page-puck-editor .Puck,
+.info-page-puck-editor [class*="_Puck_"],
+.info-page-puck-editor [class*="PuckLayout-inner"] {
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.info-page-puck-editor [class*="PuckCanvas"] {
+  overflow: auto !important;
+}
+
+.info-page-preview-mode-bar {
+  border-bottom: 1px solid hsl(var(--border));
+  background: linear-gradient(
+    to bottom,
+    oklch(var(--surface)),
+    oklch(var(--muted) / 0.35)
+  );
+}
+
+/* -------------------------------------------------------------------------- *
+ * Mobile: iPhone frame + natural content height (no vertical stretch)
+ * -------------------------------------------------------------------------- */
+
+.info-page-puck-editor--mobile [class*="PuckCanvas"] {
+  background: radial-gradient(
+    ellipse 70% 45% at 50% 12%,
+    hsl(var(--muted) / 0.45) 0%,
+    hsl(var(--background)) 70%
+  ) !important;
+}
+
+.info-page-puck-editor--mobile [class*="PuckCanvas-inner"] {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 1.5rem 0.5rem !important;
+}
+
+.info-page-puck-editor--mobile [id="puck-canvas-root"] {
+  position: relative !important;
+  top: auto !important;
+  bottom: auto !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: var(--info-page-iphone-frame-width) !important;
+  max-width: calc(100% - 0.5rem) !important;
+  height: var(--info-page-iphone-screen-height) !important;
+  min-height: var(--info-page-iphone-screen-height) !important;
+  max-height: var(--info-page-iphone-screen-height) !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
+  border-radius: 44px !important;
+  background: hsl(var(--background)) !important;
+  box-shadow:
+    0 0 0 2px #1c1c1e,
+    0 0 0 5px #2c2c2e,
+    0 24px 48px -12px rgba(0, 0, 0, 0.4) !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+
+.info-page-iphone-screen {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.info-page-iphone-screen-scroll {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-top: 44px;
+  padding-bottom: 56px;
+  background: hsl(var(--background));
+}
+
+.info-page-iphone-content-scale {
+  width: 100%;
+}
+
+/* Stop Puck from stretching blocks to fill the phone height */
+.info-page-puck-editor--mobile [data-puck-preview],
+.info-page-puck-editor--mobile #preview-frame,
+.info-page-puck-editor--mobile [data-puck-dropzone],
+.info-page-puck-editor--mobile [class*="DropZone"] {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.info-page-puck-editor--mobile [data-puck-preview] {
+  position: relative !important;
+  width: 100% !important;
+  direction: rtl;
+}
+
+.info-page-puck-editor--mobile [data-puck-preview] > div {
+  width: 100% !important;
+  min-height: 0 !important;
+  height: auto !important;
+  background: hsl(var(--background)) !important;
+}
+
+.info-page-puck-editor--mobile [data-puck-component] {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Tighter, mobile-friendly spacing inside preview only */
+.info-page-puck-editor--mobile [data-puck-preview] header,
+.info-page-puck-editor--mobile [data-puck-preview] section {
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.info-page-puck-editor--mobile [data-puck-preview] header {
+  padding-top: 1.25rem !important;
+  padding-bottom: 1rem !important;
+}
+
+.info-page-puck-editor--mobile [data-puck-preview] section {
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+}
+
+.info-page-puck-editor--mobile [data-puck-preview] p,
+.info-page-puck-editor--mobile [data-puck-preview] li {
+  word-break: normal !important;
+  overflow-wrap: anywhere;
+  line-height: 1.55 !important;
+}
+
+.info-page-puck-editor--mobile [data-puck-preview] h1 {
+  font-size: 1.375rem !important;
+  line-height: 1.25 !important;
+}
+
+.info-page-puck-editor--mobile [data-puck-preview] h2 {
+  font-size: 1.25rem !important;
+  line-height: 1.3 !important;
+}
+
+.info-page-puck-editor--mobile [data-puck-preview] h3,
+.info-page-puck-editor--mobile [data-puck-preview] h4 {
+  font-size: 1.05rem !important;
+}
+
+.info-page-puck-editor--mobile [data-puck-preview] .text-3xl,
+.info-page-puck-editor--mobile [data-puck-preview] .text-4xl {
+  font-size: 1.25rem !important;
+  line-height: 1.3 !important;
+}
+
+.info-page-puck-editor--mobile [data-puck-preview] .py-12,
+.info-page-puck-editor--mobile [data-puck-preview] .py-16,
+.info-page-puck-editor--mobile [data-puck-preview] .py-20 {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
+.info-page-puck-editor--mobile [data-puck-preview] img {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+.info-page-puck-editor--mobile [data-puck-preview] .grid {
+  grid-template-columns: 1fr !important;
+}
+
+/* iPhone chrome overlays */
+.info-page-iphone-chrome {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  border-radius: 44px;
+  box-shadow:
+    inset 0 0 0 3px #1c1c1e,
+    inset 0 0 0 4px #3a3a3c;
+}
+
+.info-page-iphone-island {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  z-index: 51;
+  width: 110px;
+  height: 32px;
+  transform: translateX(-50%);
+  background: #000;
+  border-radius: 18px;
+}
+
+.info-page-iphone-island-camera {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #1e3a5f, #000);
+}
+
+.info-page-iphone-home-bar {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  z-index: 51;
+  width: 120px;
+  height: 4px;
+  transform: translateX(-50%);
+  border-radius: 100px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.info-page-mobile-scroll-hint {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  z-index: 52;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+  animation: info-page-hint-bob 2.2s ease-in-out infinite;
+}
+
+.info-page-mobile-scroll-hint span {
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: hsl(var(--background) / 0.92);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes info-page-hint-bob {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-5px);
+  }
+}

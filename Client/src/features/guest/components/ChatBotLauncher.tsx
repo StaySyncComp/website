@@ -11,7 +11,7 @@ export default function ChatbotLauncher() {
   };
 
   return (
-    <div className="fixed bottom-6 rtl:left-6 ltr:right-6 z-50">
+    <div className="relative">
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
