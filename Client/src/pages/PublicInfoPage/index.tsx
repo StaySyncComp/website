@@ -7,30 +7,22 @@ import { fetchPublicInfoPage } from "@/features/organization/api/infoPage";
 import { applyOrganizationTheme } from "@/lib/utils/hooks/UseOrganizationUtils";
 import type { Data } from "@measured/puck";
 import { useTranslation } from "react-i18next";
-import { emptyPuckData } from "@/features/organization/components/InfoPageSettings/puck/config";
+import { normalizePuckData } from "@/features/organization/components/InfoPageSettings/puck/normalizePuckData";
 
 const PublicPuckRender = lazy(() => import("./PublicPuckRender"));
 
-function normalizePublishedData(raw: unknown): Data {
-  if (
-    raw &&
-    typeof raw === "object" &&
-    "content" in raw &&
-    Array.isArray((raw as Data).content)
-  ) {
-    return raw as Data;
-  }
-  return emptyPuckData as Data;
-}
-
 export default function PublicInfoPage() {
-  const { organizationId } = useParams<{ organizationId: string }>();
+  const { organizationId, pageId: pageIdParam } = useParams<{
+    organizationId: string;
+    pageId?: string;
+  }>();
   const { t, i18n } = useTranslation();
   const orgId = Number(organizationId);
+  const pageId = pageIdParam ? Number(pageIdParam) : undefined;
 
   const query = useQuery({
-    queryKey: ["public-info-page", orgId],
-    queryFn: () => fetchPublicInfoPage(orgId),
+    queryKey: ["public-info-page", orgId, pageId],
+    queryFn: () => fetchPublicInfoPage(orgId, pageId),
     enabled: Number.isInteger(orgId) && orgId > 0,
     retry: false,
   });
@@ -72,18 +64,23 @@ export default function PublicInfoPage() {
     );
   }
 
-  const { organization, publishedContent } = query.data;
-  const pageData = normalizePublishedData(publishedContent);
+  const { organization, page, publishedContent } = query.data;
+  const pageData = normalizePuckData(publishedContent);
   const hasBlocks = pageData.content.length > 0;
+  const hasInPageBranding = pageData.content.some(
+    (block) => block.type === "HotelBranding"
+  );
 
   return (
     <>
       <Helmet>
-        <title>{organization.name}</title>
+        <title>
+          {page?.title ? `${page.title} | ${organization.name}` : organization.name}
+        </title>
       </Helmet>
-      <div className="min-h-screen bg-background" dir={i18n.dir()}>
-        {organization.logo ? (
-          <header className="flex justify-center py-6 px-4 border-b border-border">
+      <div className="min-h-screen w-full bg-background" dir={i18n.dir()}>
+        {organization.logo && !hasInPageBranding ? (
+          <header className="flex justify-center py-6 px-4 border-b border-border w-full">
             <img
               src={organization.logo}
               alt={organization.name}
@@ -91,7 +88,7 @@ export default function PublicInfoPage() {
             />
           </header>
         ) : null}
-        <main>
+        <main className="w-full">
           {hasBlocks ? (
             <Suspense
               fallback={

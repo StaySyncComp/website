@@ -7,16 +7,20 @@ import { getInfoPagePublicUrl } from "@/features/organization/api/infoPage";
 
 interface Props {
   organizationId: number;
+  pageId: number;
+  pageTitle: string;
   isPublished: boolean;
 }
 
 export default function InfoPageSharePanel({
   organizationId,
+  pageId,
+  pageTitle,
   isPublished,
 }: Props) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
-  const publicUrl = getInfoPagePublicUrl(organizationId);
+  const publicUrl = getInfoPagePublicUrl(organizationId, pageId);
 
   const copyUrl = async () => {
     try {
@@ -42,6 +46,7 @@ export default function InfoPageSharePanel({
         <p className="text-sm text-muted-foreground mt-1">
           {t("info_page_share_description")}
         </p>
+        <p className="text-sm font-medium text-accent mt-2">{pageTitle}</p>
       </div>
 
       {!isPublished && (

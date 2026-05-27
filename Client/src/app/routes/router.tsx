@@ -58,6 +58,11 @@ export const router = createBrowserRouter([
         handle: { documentTitle: "information_page" },
       },
       {
+        path: "/info/:organizationId/:pageId",
+        element: <PublicInfoPage />,
+        handle: { documentTitle: "information_page" },
+      },
+      {
         path: "/create-organization",
         element: <CreateOrganization />,
         handle: { documentTitle: "create_organization" },

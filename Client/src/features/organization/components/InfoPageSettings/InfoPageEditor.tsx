@@ -2,7 +2,6 @@ import {
   lazy,
   Suspense,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
@@ -10,29 +9,30 @@ import {
 import type { Data } from "@measured/puck";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
-import { OrganizationsContext } from "@/features/organization/context/organization-context";
 import { useInfoPage } from "@/features/organization/hooks/useInfoPage";
-import { emptyPuckData } from "./puck/config";
+import { normalizePuckData } from "./puck/normalizePuckData";
 import InfoPageSharePanel from "./InfoPageSharePanel";
+import EditorToolbar from "./EditorToolbar";
+import TemplatePicker from "./TemplatePicker";
 import { Loader2, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 const PuckEditor = lazy(() => import("./PuckEditor"));
 
-function normalizeData(raw: unknown): Data {
-  if (
-    raw &&
-    typeof raw === "object" &&
-    "content" in raw &&
-    Array.isArray((raw as Data).content)
-  ) {
-    return raw as Data;
-  }
-  return emptyPuckData as Data;
+interface Props {
+  pageId: number;
+  organizationId: number;
+  organizationName: string;
+  organizationLogo?: string;
 }
 
-export default function InfoPageEditor() {
+export default function InfoPageEditor({
+  pageId,
+  organizationId,
+  organizationName,
+  organizationLogo,
+}: Props) {
   const { t, ready: i18nReady } = useTranslation();
-  const { organization } = useContext(OrganizationsContext);
   const {
     infoPage,
     isLoading,
@@ -44,40 +44,85 @@ export default function InfoPageEditor() {
     isPublishing,
     unpublish,
     isUnpublishing,
-  } = useInfoPage();
+  } = useInfoPage(pageId);
 
   const serverDraft = useMemo(
-    () => normalizeData(infoPage?.draftContent),
+    () => normalizePuckData(infoPage?.draftContent),
     [infoPage?.draftContent]
   );
 
   const [editorData, setEditorData] = useState<Data>(serverDraft);
+  const [pageTitle, setPageTitle] = useState(infoPage?.title ?? "");
   const [isDirty, setIsDirty] = useState(false);
+  const [titleDirty, setTitleDirty] = useState(false);
+
   useEffect(() => {
     setEditorData(serverDraft);
+    setPageTitle(infoPage?.title ?? "");
     setIsDirty(false);
-  }, [serverDraft]);
+    setTitleDirty(false);
+  }, [serverDraft, infoPage?.title, pageId]);
 
   const handleChange = useCallback((data: Data) => {
     setEditorData(data);
     setIsDirty(true);
   }, []);
 
+  const handleTitleChange = (title: string) => {
+    setPageTitle(title);
+    setTitleDirty(true);
+  };
+
   const handleSaveDraft = async () => {
-    await saveDraft(editorData);
+    const normalized = normalizePuckData(editorData);
+    setEditorData(normalized);
+    await saveDraft({
+      draftContent: normalized,
+      ...(titleDirty ? { title: pageTitle } : {}),
+    });
     setIsDirty(false);
+    setTitleDirty(false);
   };
 
   const handlePublish = async () => {
-    await publish(editorData);
+    const normalized = normalizePuckData(editorData);
+    setEditorData(normalized);
+    if (isDirty || titleDirty) {
+      await saveDraft({
+        draftContent: normalized,
+        ...(titleDirty ? { title: pageTitle } : {}),
+      });
+    }
+    await publish(normalized);
     setIsDirty(false);
+    setTitleDirty(false);
   };
 
   const handleUnpublish = async () => {
     await unpublish();
   };
 
-  if (!i18nReady || !organization) {
+  const hasExistingContent = editorData.content.length > 0;
+  const hasUnsaved = isDirty || titleDirty;
+
+  const templateContext = useMemo(
+    () => ({
+      organizationName,
+      organizationLogo,
+    }),
+    [organizationName, organizationLogo]
+  );
+
+  const handleApplyTemplate = useCallback(
+    (data: Data) => {
+      setEditorData(normalizePuckData(data));
+      setIsDirty(true);
+      toast.success(t("info_page_template_applied"));
+    },
+    [t]
+  );
+
+  if (!i18nReady) {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -94,7 +139,7 @@ export default function InfoPageEditor() {
     );
   }
 
-  if (isError) {
+  if (isError || !infoPage) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-4 max-w-md mx-auto text-center">
         <AlertCircle className="h-10 w-10 text-destructive" />
@@ -111,30 +156,53 @@ export default function InfoPageEditor() {
   return (
     <div className="flex flex-col gap-6">
       <InfoPageSharePanel
-        organizationId={organization.id}
-        isPublished={!!infoPage?.isPublished}
+        organizationId={organizationId}
+        pageId={pageId}
+        pageTitle={pageTitle}
+        isPublished={!!infoPage.isPublished}
       />
 
-      <div className="border border-border rounded-lg overflow-hidden min-h-[600px] [&_.Puck]:!min-h-[600px]">
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center min-h-[600px]">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          }
-        >
-          <PuckEditor
-            data={editorData}
-            onChange={handleChange}
-            headerTitle={t("information_page")}
-            headerPath={organization.name}
-          />
-        </Suspense>
+      {!hasExistingContent && (
+        <TemplatePicker
+          variant="inline"
+          hasExistingContent={false}
+          onApply={handleApplyTemplate}
+          templateContext={templateContext}
+        />
+      )}
+
+      <div className="border border-border rounded-xl overflow-hidden shadow-sm bg-surface">
+        <EditorToolbar
+          pageTitle={pageTitle}
+          onTitleChange={handleTitleChange}
+          hasExistingContent={hasExistingContent}
+          onApplyTemplate={handleApplyTemplate}
+          organizationName={organizationName}
+          templateContext={templateContext}
+        />
+
+        <div className="min-h-[600px] [&_.Puck]:!min-h-[600px]">
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center min-h-[600px]">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            }
+          >
+            <PuckEditor
+              key={`${pageId}-${editorData.content.map((c) => c.props.id).join("-") || "empty"}`}
+              data={editorData}
+              onChange={handleChange}
+              headerTitle={pageTitle}
+              headerPath={organizationName}
+            />
+          </Suspense>
+        </div>
       </div>
 
       <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-surface rounded-2xl shadow-xl px-4 py-3 w-fit border z-50">
         <div className="flex flex-wrap items-center gap-3 md:gap-6">
-          {isDirty && (
+          {hasUnsaved && (
             <span className="text-sm font-medium">
               {t("info_page_unsaved_changes")}
             </span>
@@ -143,7 +211,7 @@ export default function InfoPageEditor() {
             <Button
               type="button"
               variant="outline"
-              disabled={!isDirty || isSaving}
+              disabled={!hasUnsaved || isSaving}
               loading={isSaving}
               onClick={handleSaveDraft}
             >
@@ -157,7 +225,7 @@ export default function InfoPageEditor() {
             >
               {t("publish")}
             </Button>
-            {infoPage?.isPublished && (
+            {infoPage.isPublished && (
               <Button
                 type="button"
                 variant="ghost"
