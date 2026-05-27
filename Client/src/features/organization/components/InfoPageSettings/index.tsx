@@ -1,5 +1,5 @@
-import InfoPageEditor from "./InfoPageEditor";
+import InfoPagesManager from "./InfoPagesManager";
 
 export default function InfoPageSettings() {
-  return <InfoPageEditor />;
+  return <InfoPagesManager />;
 }
