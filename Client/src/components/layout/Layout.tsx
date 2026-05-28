@@ -1,14 +1,34 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Helmet } from "react-helmet";
 import { useContext } from "react";
+import { useLocation } from "react-router-dom";
 import { OrganizationsContext } from "@/features/organization/context/organization-context";
 import { useRoutes } from "@/hooks/useRoutes";
 import { useTranslation } from "react-i18next";
 import { useRTL } from "@/hooks/useRtl";
 import { AppSidebar } from "./sidebar/Sidebar";
+import { WidgetTemplateSidebar } from "./sidebar/WidgetTemplateSidebar";
 import Navigation from "./topbar/Navigation";
+import {
+  DashboardEditProvider,
+  useDashboardEditOptional,
+} from "@/features/home-dashboard/DashboardEditContext";
+
 interface LayoutProps {
   children: React.ReactNode;
+}
+
+function LayoutSidebars({ side }: { side: "left" | "right" }) {
+  const location = useLocation();
+  const edit = useDashboardEditOptional();
+  const isHomeEdit =
+    location.pathname === "/home" && (edit?.isEditMode ?? false);
+
+  if (isHomeEdit) {
+    return <WidgetTemplateSidebar side={side} />;
+  }
+
+  return <AppSidebar side={side} />;
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
@@ -20,28 +40,29 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     // @ts-ignore
     currentRoute?.handle.documentTitle,
   )}`;
+  const sidebarSide = isRtl ? "right" : "left";
+
   return (
     <>
       <Helmet>
         <title>{organization && title}</title>
       </Helmet>
       <div className="flex h-screen flex-col relative">
-        {/* <Topbar /> */}
+        <DashboardEditProvider>
+          <SidebarProvider>
+            <LayoutSidebars side={sidebarSide} />
 
-        <SidebarProvider>
-          <AppSidebar side={isRtl ? "right" : "left"} />
+            <SidebarInset>
+              <Navigation />
 
-          <SidebarInset>
-            <Navigation />
-
-            <div className="flex flex-col gap-4 flex-1 overflow-auto">
-              <div className="w-full overflow-y-auto p-2 min-h-full ">
-                {children}
+              <div className="flex flex-col gap-4 flex-1 overflow-auto">
+                <div className="w-full overflow-y-auto p-2 min-h-full ">
+                  {children}
+                </div>
               </div>
-              {/* <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" /> */}
-            </div>
-          </SidebarInset>
-        </SidebarProvider>
+            </SidebarInset>
+          </SidebarProvider>
+        </DashboardEditProvider>
       </div>
     </>
   );
