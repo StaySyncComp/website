@@ -44,7 +44,12 @@ function MultiCheckBox({
       />
       {error && (
         <span className="text-red-500 text-sm">
-          {t("form.error_message")}: {error.message as string}
+          {t("form.error_message")}:{" "}
+          {typeof error.message === "string"
+            ? error.message
+            : Array.isArray(error.message)
+              ? error.message.map((m: { message?: string }) => m?.message).join(", ")
+              : String(error.message ?? "")}
         </span>
       )}
     </div>

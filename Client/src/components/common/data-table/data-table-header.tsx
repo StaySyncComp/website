@@ -49,11 +49,11 @@ function DataTableHeader() {
               </TableHead>
             );
           })}
-          {actions && (
+          {actions && actions.length > 0 && (
             <TableHead
-              className={`text-surface bg-foreground ${lastColumnRounding}`}
+              className={`overflow-hidden bg-foreground px-3 text-surface sm:px-4 ${lastColumnRounding}`}
             >
-              <div className="flex w-full justify-end">
+              <div className="flex w-full min-w-[12rem] justify-center">
                 <Pagination table={table} />
               </div>
             </TableHead>

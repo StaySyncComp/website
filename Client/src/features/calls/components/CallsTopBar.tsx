@@ -134,7 +134,7 @@ export function CallsTopBar({
   return (
     <div className="flex flex-col gap-3">
       {/* Row 1 — filters (right in RTL) + create button (left in RTL) */}
-      <div className="mx-3 flex flex-wrap-reverse items-center justify-between gap-3">
+      <div className="flex flex-wrap-reverse items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           <div className="inline-flex h-9 items-center overflow-hidden rounded-full border border-[#C9D4F6] bg-white text-[13px] font-medium text-[#5B6378]">
             <DropdownMenu>

@@ -336,6 +336,7 @@
   "opened": "Open",
   "active_calls": "Active Requests",
   "recurring_calls": "Recurring Requests",
+  "call_from_recurring": "Created from a recurring schedule",
   "recurring_call": "Recurring Requests",
   "total_completed_calls": "Total readings completed",
   "total_open_calls": "Total open Requests",

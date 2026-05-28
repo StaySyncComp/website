@@ -382,6 +382,7 @@
   "opened": "פניה פתוחה",
   "active_calls": "פניות פעילות",
   "recurring_calls": "פניות מחזוריות",
+  "call_from_recurring": "נוצרה מפנייה מחזורית",
   "recurring_call": "פניה מחזורית",
   "total_completed_calls": "סך הכל פניות שהושלמו",
   "total_open_calls": "סך הכל פניות פתוחות",

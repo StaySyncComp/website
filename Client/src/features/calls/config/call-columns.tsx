@@ -3,6 +3,17 @@ import { Call } from "@/types/api/calls";
 import { i18n, TFunction } from "i18next";
 import { formatDateTime } from "@/lib/dateUtils";
 import { StatusBadge } from "@/components/common/data-table/StatusBadge";
+import { Repeat } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+function isFromRecurringSchedule(call: Call): boolean {
+  return call.recurringCallId != null && Number(call.recurringCallId) > 0;
+}
 
 export const getCallColumns = (
   t: TFunction,
@@ -12,20 +23,49 @@ export const getCallColumns = (
   {
     accessorKey: "callCategoryId",
     header: t("call_category"),
-    cell: ({ row }) =>
+    cell: ({ row }) => {
+      const call = row.original;
+      const fromRecurring = isFromRecurringSchedule(call);
       //@ts-ignore
-      row.original.callCategory?.name?.[i18n.language as "he" | "en" | "ar"] ||
-      "-",
+      const categoryName =
+        call.callCategory?.name?.[i18n.language as "he" | "en" | "ar"] || "-";
+
+      return (
+        <div className="flex items-center gap-1.5">
+          {fromRecurring ? (
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[#EAF2FF] text-[#2F80ED]"
+                    aria-label={t("call_from_recurring")}
+                  >
+                    <Repeat className="size-3.5" strokeWidth={2.2} />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  {t("call_from_recurring")}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : null}
+          <span>{categoryName}</span>
+        </div>
+      );
+    },
   },
 
   {
     accessorKey: "description",
     header: t("description"),
-    cell: ({ row }) => (
-      //@ts-ignore
-
-      <div className="w-32 truncate">{row.original.description || "-"}</div>
-    ),
+    cell: ({ row }) => {
+      const description = row.original.description || "-";
+      return (
+        <div className="w-32 truncate" title={description}>
+          {description}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "locationId",
