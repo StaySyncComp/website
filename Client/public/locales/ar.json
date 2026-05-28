@@ -280,6 +280,7 @@
   "opened": "قراءة مفتوحة",
   "active_calls": "قراءات النشاط",
   "recurring_calls": "قراءة الدورية",
+  "call_from_recurring": "تم إنشاؤها من جدول متكرر",
   "recurring_call": "قراءة الدورة",
   "total_completed_calls": "إجمالي القراءات الانتهاء",
   "total_open_calls": "إجمالي المكالمات المفتوحة",

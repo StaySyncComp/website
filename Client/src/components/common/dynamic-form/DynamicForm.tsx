@@ -203,6 +203,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
             error={error}
             control={control}
             requiredFields={requiredFields}
+            defaultValues={defaultValues}
           />
         );
 

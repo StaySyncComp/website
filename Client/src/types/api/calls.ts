@@ -43,6 +43,8 @@ export interface Call {
   callCategory: CallCategory;
   location: Location;
   CallStatusHistory: CallStatusHistory[];
+  /** Set when this call was spawned from a recurring schedule */
+  recurringCallId?: number | null;
 }
 
 export interface RecurringCall extends BaseEntity {

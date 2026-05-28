@@ -41,7 +41,7 @@ export default function Pagination<T>({ table }: PaginationProps<T>) {
   };
 
   return (
-    <div className="flex items-center justify-center gap-2 px-4">
+    <div className="flex items-center justify-center gap-1.5">
       <Button
         variant="ghost"
         size="icon"

@@ -182,7 +182,11 @@ export function DataTable<TData>({
         idField,
       }}
     >
-      <div className="space-y-4">
+      <div
+        className={
+          renderToolbar ? "mx-3 flex flex-col gap-3" : "space-y-4"
+        }
+      >
         {renderToolbar ? (
           renderToolbar({ globalFilter, setGlobalFilter, toggleAddRow })
         ) : (
@@ -207,8 +211,8 @@ export function DataTable<TData>({
           </div>
         )}
 
-        <div className="rounded-lg w-full">
-          <Table className="w-full min-w-full border-collapse border-spacing-2 text-right">
+        <div className="w-full max-w-full overflow-x-auto rounded-lg">
+          <Table className="w-full border-collapse border-spacing-2 text-right">
             <DataTableHeader />
             <DataTableBody<TData> />
             <span style={{ display: "none" }}>{now}</span>
