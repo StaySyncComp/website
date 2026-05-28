@@ -17,17 +17,22 @@ import { callFormSchema } from "@/features/calls/schemas/call-form-schema";
 import DynamicForm from "@/components/common/dynamic-form/DynamicForm";
 import { z } from "zod";
 import { useUser } from "@/features/auth/hooks/useUser";
-import { AdvancedSearchModal } from "@/components/common/advanced-search/AdvancedSearchModal";
 import { AdvancedSearchFieldConfig } from "@/types/advanced-search";
-import { ExportButtonWrapper } from "@/components/common/table-actions/ExportButtonWrapper";
-import { ColumnVisibilityButton } from "@/components/common/table-actions/ColumnVisibilityButton";
+import { CallsTab, CallsTopBar } from "@/features/calls/components/CallsTopBar";
 
 interface CallTableProps {
   selectedCall: Call | null;
   onSelect: (call: Call | null) => void;
+  activeTab: CallsTab;
+  onTabChange: (tab: CallsTab) => void;
 }
 
-export default function CallTable({ selectedCall, onSelect }: CallTableProps) {
+export default function CallTable({
+  selectedCall,
+  onSelect,
+  activeTab,
+  onTabChange,
+}: CallTableProps) {
   const { departments, callCategories } = useContext(OrganizationsContext);
   const { locations } = useLocations();
   const { allUsers } = useUser();
@@ -47,23 +52,6 @@ export default function CallTable({ selectedCall, onSelect }: CallTableProps) {
     Record<string, unknown>
   >({});
 
-  const handleCloseCall = async (callId: string | number) => {
-    await updateCall({ id: String(callId), status: "COMPLETED" });
-    setRefreshKey((k) => k + 1);
-  };
-
-  const handleAssignWorker = async (
-    callId: string | number,
-    workerId: string,
-  ) => {
-    await updateCall({
-      id: String(callId),
-      assignedToId: Number(workerId),
-      status: "IN_PROGRESS",
-    });
-    setRefreshKey((k) => k + 1);
-  };
-
   const columns = getCallColumns(t, i18n, statusOptions);
   const fields = getCallFields(
     t,
@@ -77,25 +65,8 @@ export default function CallTable({ selectedCall, onSelect }: CallTableProps) {
   const actions: TableAction<Call>[] = [
     { label: "Edit", type: "edit" },
     { type: "delete", label: "Delete" },
-    // {
-    //   // @ts-ignore
-    //   placement: "external",
-    //   // @ts-ignore
-    //   component: (row) => (
-    //     <ActionCell
-    //       call={row.original}
-    //       onCloseCall={handleCloseCall}
-    //       onAssignWorker={handleAssignWorker}
-    //       users={allUsers.map((user: User) => ({
-    //         value: user.id,
-    //         label: user.name || user.email || user.id,
-    //       }))}
-    //     />
-    //   ),
-    // },
   ];
 
-  // Advanced search config for Calls
   const advancedFields: AdvancedSearchFieldConfig[] = [
     {
       name: "status",
@@ -161,7 +132,6 @@ export default function CallTable({ selectedCall, onSelect }: CallTableProps) {
     },
   ];
 
-  // Modify fetchData to update tableData
   const fetchData = async (params: Record<string, unknown>) => {
     const mergedParams = { ...params, ...advancedFilters };
     Object.keys(mergedParams).forEach(
@@ -177,6 +147,19 @@ export default function CallTable({ selectedCall, onSelect }: CallTableProps) {
     return response;
   };
 
+  const exportColumns = columns.map((col: any) => ({
+    id: col.accessorKey || col.id,
+    label: typeof col.header === "string" ? col.header : undefined,
+  }));
+
+  const departmentOptions = departments.map((dep) => ({
+    id: dep.id,
+    name:
+      typeof dep.name === "object"
+        ? dep.name[i18n.language as "he" | "en" | "ar"] || dep.name.en || ""
+        : dep.name || "",
+  }));
+
   return (
     <div className="flex-1 flex flex-col">
       <DataTable<Call>
@@ -189,7 +172,7 @@ export default function CallTable({ selectedCall, onSelect }: CallTableProps) {
         deleteData={deleteCall}
         actions={actions}
         idField="id"
-        showAddButton
+        showAddButton={false}
         key={refreshKey}
         sorting={sorting}
         onSortingChange={setSorting}
@@ -197,17 +180,38 @@ export default function CallTable({ selectedCall, onSelect }: CallTableProps) {
         setAdvancedFilters={setAdvancedFilters}
         onRowClick={(row) => onSelect(row.original)}
         selectedRowId={selectedCall?.id}
-        rightHeaderContent={
-          <div className="flex items-center gap-2">
-            <ColumnVisibilityButton />
-            <ExportButtonWrapper columns={columns} filename="calls.csv" />
-            <AdvancedSearchModal
-              fields={advancedFields}
-              onApply={setAdvancedFilters}
-            />
-          </div>
-        }
-        // Remove renderExpandedContent to disable expansion and use the side card instead
+        renderToolbar={({ globalFilter, setGlobalFilter, toggleAddRow }) => (
+          <CallsTopBar
+            activeTab={activeTab}
+            onTabChange={onTabChange}
+            onCreate={toggleAddRow}
+            globalFilter={globalFilter}
+            setGlobalFilter={setGlobalFilter}
+            advancedFields={advancedFields}
+            onAdvancedApply={setAdvancedFilters}
+            onQuickDateApply={({ createdAtFrom, createdAtTo }) =>
+              setAdvancedFilters((prev) => ({
+                ...prev,
+                createdAtFrom,
+                createdAtTo,
+              }))
+            }
+            departments={departmentOptions}
+            onDepartmentsApply={(departmentIds) =>
+              setAdvancedFilters((prev) => {
+                const next = { ...prev } as Record<string, unknown>;
+                if (departmentIds.length === 0) {
+                  delete next.departmentId;
+                } else {
+                  next.departmentId = Number(departmentIds[0]);
+                }
+                return next;
+              })
+            }
+            exportFilename="calls.csv"
+            exportColumns={exportColumns}
+          />
+        )}
         renderEditContent={({ rowData, handleSave, handleEdit }) => {
           const mode = rowData?.id ? "edit" : "create";
           const filteredFields = fields.filter((f) => f.name !== "status");

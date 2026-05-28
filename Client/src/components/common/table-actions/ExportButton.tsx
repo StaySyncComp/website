@@ -48,7 +48,7 @@ export const ExportButton = <T extends Record<string, any>>({
       type="button"
       variant={"tableButton"}
       tooltip={t("reports.export.csv")}
-      className="border-x"
+      className="h-9 w-9 rounded-lg border-0 px-0 text-[#5B6785] hover:bg-[#F4F7FD]"
       onClick={() => {
         if (isDisabled) return;
         const csv = toCsv(data, columns);
@@ -65,7 +65,7 @@ export const ExportButton = <T extends Record<string, any>>({
       aria-label={t("reports.export.csv")}
       tabIndex={isDisabled ? -1 : 0}
     >
-      <Download className="size-5" />
+      <Download className="size-4" />
     </Button>
   );
 };

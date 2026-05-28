@@ -14,8 +14,12 @@ export const DataTableAddButton = ({
 }: DataTableAddButtonProps) => {
   const { t } = useTranslation();
   return showAddButton ? (
-    <Button variant={"accentGhost"} onClick={onToggleAddRow}>
-      <PlusCircle className="ml-2 size-5" />
+    <Button
+      variant={"accentGhost"}
+      onClick={onToggleAddRow}
+      className="h-10 rounded-lg px-3 text-[#2D7EF8] hover:bg-[#F2F6FF]"
+    >
+      <PlusCircle className="ml-2 size-4" />
       {t("add")}
     </Button>
   ) : null;

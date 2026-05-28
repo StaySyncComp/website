@@ -56,8 +56,15 @@ export interface DataTableProps<TData> {
   sorting?: SortingState;
   onSortingChange?: React.Dispatch<React.SetStateAction<SortingState>>;
   rightHeaderContent?: React.ReactNode;
+  renderToolbar?: (ctx: DataTableToolbarContext) => React.ReactNode;
   websocketUrl?: string;
   channelId?: string;
+}
+
+export interface DataTableToolbarContext {
+  globalFilter: string;
+  setGlobalFilter: React.Dispatch<React.SetStateAction<string>>;
+  toggleAddRow: () => void;
 }
 
 export interface TableAction<TData> {

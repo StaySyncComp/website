@@ -9,9 +9,16 @@ interface AdvancedSearchModalProps {
   onApply: (values: Record<string, any>) => void;
   initialValues?: Record<string, any>;
   title?: string;
+  renderTrigger?: (open: () => void) => React.ReactNode;
 }
 
-export const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({ fields, onApply, initialValues = {}, title }) => {
+export const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
+  fields,
+  onApply,
+  initialValues = {},
+  title,
+  renderTrigger,
+}) => {
   const [open, setOpen] = useState(false);
   const [formValues, setFormValues] = useState<Record<string, any>>(initialValues);
 
@@ -29,7 +36,11 @@ export const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({ fields
 
   return (
     <>
-      <AdvancedSearchButton onClick={() => setOpen(true)} />
+      {renderTrigger ? (
+        renderTrigger(() => setOpen(true))
+      ) : (
+        <AdvancedSearchButton onClick={() => setOpen(true)} />
+      )}
       <AdvancedSearchDialog open={open} onOpenChange={setOpen} title={title || "סינון מתקדם"}>
         <AdvancedSearchForm
           fields={fields}
@@ -40,4 +51,4 @@ export const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({ fields
       </AdvancedSearchDialog>
     </>
   );
-}; 
+};

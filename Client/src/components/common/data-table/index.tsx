@@ -38,6 +38,7 @@ export function DataTable<TData>({
   selectedRowId,
   initialData,
   rightHeaderContent,
+  renderToolbar,
   websocketUrl,
   advancedFilters = {},
 }: DataTableProps<TData> & {
@@ -181,29 +182,33 @@ export function DataTable<TData>({
         idField,
       }}
     >
-      <div className="space-y-4 ">
-        <div
-          className={`${
-            searchable ? "justify-between" : "justify-end"
-          } flex items-center`}
-        >
-          {searchable && (
-            <div className="flex items-center gap-2">
-              <DataTableSearch
-                globalFilter={globalFilter}
-                setGlobalFilter={setGlobalFilter}
-              />
-              {rightHeaderContent}
-            </div>
-          )}
-          <DataTableAddButton
-            showAddButton={showAddButton}
-            onToggleAddRow={toggleAddRow}
-          />
-        </div>
+      <div className="space-y-4">
+        {renderToolbar ? (
+          renderToolbar({ globalFilter, setGlobalFilter, toggleAddRow })
+        ) : (
+          <div
+            className={`${
+              searchable ? "justify-between" : "justify-end"
+            } flex flex-wrap items-center gap-3`}
+          >
+            {searchable && (
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <DataTableSearch
+                  globalFilter={globalFilter}
+                  setGlobalFilter={setGlobalFilter}
+                />
+                {rightHeaderContent}
+              </div>
+            )}
+            <DataTableAddButton
+              showAddButton={showAddButton}
+              onToggleAddRow={toggleAddRow}
+            />
+          </div>
+        )}
 
-        <div className="rounded-lg w-full ">
-          <Table className="border-collapse border-spacing-2 text-right">
+        <div className="rounded-lg w-full">
+          <Table className="w-full min-w-full border-collapse border-spacing-2 text-right">
             <DataTableHeader />
             <DataTableBody<TData> />
             <span style={{ display: "none" }}>{now}</span>
