@@ -32,7 +32,8 @@ export const DataTableSearch = ({
       value={inputValue ?? ""}
       icon={<Search className="text-muted-foreground" />}
       onChange={(e) => setInputValue(e.target.value)}
-      className="max-w-sm min-w-64"
+      className="w-[220px] sm:w-[280px] lg:w-[360px]"
+      style={{ height: 40 }}
     />
   );
 };

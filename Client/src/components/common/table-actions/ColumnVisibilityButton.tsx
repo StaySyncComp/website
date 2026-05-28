@@ -22,10 +22,10 @@ export function ColumnVisibilityButton() {
           tooltip={t("column_visibility")}
           variant={"tableButton"}
           type="button"
-          className="border-r"
+          className="h-9 w-9 rounded-lg border-0 px-0 text-[#5B6785] hover:bg-[#F4F7FD]"
           aria-label={t("column_visibility")}
         >
-          <Settings className="size-5" />
+          <Settings className="size-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

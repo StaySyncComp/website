@@ -124,7 +124,7 @@ function DataTableBodyRowExpanded<T>({
             <td colSpan={colSpan}>
               <motion.div
                 key={`expanded-${row?.id ?? "custom"}`}
-                className="absolute z-40 w-full bg-surface rounded-lg shadow-lg overflow-hidden"
+                className="relative z-40 w-full max-h-[calc(100vh-180px)] overflow-y-auto bg-surface rounded-lg shadow-lg"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}

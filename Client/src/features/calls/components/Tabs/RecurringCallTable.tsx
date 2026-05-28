@@ -17,11 +17,17 @@ import { TableAction } from "@/types/ui/data-table-types";
 import { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { ColumnVisibilityButton } from "@/components/common/table-actions/ColumnVisibilityButton";
-import { AdvancedSearchModal } from "@/components/common/advanced-search/AdvancedSearchModal";
-import { ExportButtonWrapper } from "@/components/common/table-actions/ExportButtonWrapper";
+import { CallsTab, CallsTopBar } from "@/features/calls/components/CallsTopBar";
 
-export default function RecurringCallTable() {
+interface RecurringCallTableProps {
+  activeTab: CallsTab;
+  onTabChange: (tab: CallsTab) => void;
+}
+
+export default function RecurringCallTable({
+  activeTab,
+  onTabChange,
+}: RecurringCallTableProps) {
   const { departments, callCategories } = useContext(OrganizationsContext);
   const { locations } = useLocations();
   const { t, i18n } = useTranslation();
@@ -49,7 +55,6 @@ export default function RecurringCallTable() {
     {},
   );
 
-  // Advanced search config for Recurring Calls
   const allowedTypes = ["select", "date", "text", "number", "checkbox"];
   const advancedFields = fields
     .filter((f) => allowedTypes.includes(f.type))
@@ -61,6 +66,19 @@ export default function RecurringCallTable() {
       placeholder: f.label,
     }));
 
+  const exportColumns = columns.map((col: any) => ({
+    id: col.accessorKey || col.id,
+    label: typeof col.header === "string" ? col.header : undefined,
+  }));
+
+  const departmentOptions = departments.map((dep) => ({
+    id: dep.id,
+    name:
+      typeof dep.name === "object"
+        ? dep.name[i18n.language as "he" | "en" | "ar"] || dep.name.en || ""
+        : dep.name || "",
+  }));
+
   return (
     <DataTable
       fetchData={fetchRecurringCallsParams}
@@ -70,22 +88,41 @@ export default function RecurringCallTable() {
       idField="id"
       columns={columns}
       actions={actions}
-      showAddButton
+      showAddButton={false}
       advancedFilters={advancedFilters}
       setAdvancedFilters={setAdvancedFilters}
-      rightHeaderContent={
-        <div className="flex items-center gap-2">
-          <ColumnVisibilityButton />
-          <ExportButtonWrapper
-            columns={columns}
-            filename="recurring_calls.csv"
-          />
-          <AdvancedSearchModal
-            fields={advancedFields}
-            onApply={setAdvancedFilters}
-          />
-        </div>
-      }
+      renderToolbar={({ globalFilter, setGlobalFilter, toggleAddRow }) => (
+        <CallsTopBar
+          activeTab={activeTab}
+          onTabChange={onTabChange}
+          onCreate={toggleAddRow}
+          globalFilter={globalFilter}
+          setGlobalFilter={setGlobalFilter}
+          advancedFields={advancedFields}
+          onAdvancedApply={setAdvancedFilters}
+          onQuickDateApply={({ createdAtFrom, createdAtTo }) =>
+            setAdvancedFilters((prev) => ({
+              ...prev,
+              createdAtFrom,
+              createdAtTo,
+            }))
+          }
+          departments={departmentOptions}
+          onDepartmentsApply={(departmentIds) =>
+            setAdvancedFilters((prev) => {
+              const next = { ...prev } as Record<string, unknown>;
+              if (departmentIds.length === 0) {
+                delete next.departmentId;
+              } else {
+                next.departmentId = Number(departmentIds[0]);
+              }
+              return next;
+            })
+          }
+          exportFilename="recurring_calls.csv"
+          exportColumns={exportColumns}
+        />
+      )}
       renderExpandedContent={({ rowData, handleEdit, handleSave }) => {
         const mode = rowData?.id ? "edit" : "create";
         return (
