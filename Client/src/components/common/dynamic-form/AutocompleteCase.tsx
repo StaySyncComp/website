@@ -42,6 +42,7 @@ function AutocompleteCase({
               options={field.options ?? []}
               placeholder={t("select_option")}
               className="h-[38px]"
+              popoverClassName={field.props?.popoverClassName}
             />
           );
         }}

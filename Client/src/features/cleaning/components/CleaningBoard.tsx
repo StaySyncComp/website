@@ -1,6 +1,5 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus } from "lucide-react";
 import { CleaningDetailsDrawer } from "@/features/cleaning/components/CleaningDetailsDrawer";
 import { CleaningFiltersBar } from "@/features/cleaning/components/CleaningFiltersBar";
 import { RoomGridGroup } from "@/features/cleaning/components/RoomGridGroup";
@@ -9,13 +8,8 @@ import { CleaningRoom, CleaningStatus } from "@/features/cleaning/types";
 import { useUser } from "@/features/auth/hooks/useUser";
 import { useRoomFilters } from "@/features/cleaning/hooks/useRoomFilters";
 import { useRoomGrouping } from "@/features/cleaning/hooks/useRoomGrouping";
-import {
-  updateCleaningTaskStatus,
-  assignWorkerToTask,
-} from "@/features/cleaning/api";
+import { patchLocationCleaning } from "@/features/cleaning/api";
 import { CleaningBoardSkeleton } from "@/features/cleaning/components/CleaningBoardSkeleton";
-import { Button } from "@/components/ui/button";
-import AddCall from "@/features/calls/components/AddCall";
 
 interface CleaningBoardProps {
   rooms: CleaningRoom[];
@@ -39,8 +33,6 @@ export const CleaningBoard = ({
 
   // State management
   const [selectedRoom, setSelectedRoom] = useState<CleaningRoom | null>(null);
-  const [isAddCallOpen, setIsAddCallOpen] = useState(false);
-  const [roomForCall, setRoomForCall] = useState<CleaningRoom | null>(null);
 
   // Use custom hooks for filtering and grouping
   const {
@@ -59,6 +51,12 @@ export const CleaningBoard = ({
     t("unknown_area"),
   );
 
+  useEffect(() => {
+    if (!selectedRoom) return;
+    const fresh = rooms.find((r) => r.id === selectedRoom.id);
+    if (fresh) setSelectedRoom(fresh);
+  }, [rooms, selectedRoom?.id]);
+
   // Event handlers - memoized for performance
   const handleRoomClick = useCallback((room: CleaningRoom) => {
     setSelectedRoom(room);
@@ -66,54 +64,53 @@ export const CleaningBoard = ({
 
   const handleStatusChange = useCallback(
     async (roomId: number, status: CleaningStatus) => {
-      const room = rooms.find((r) => r.id === roomId);
-      if (room && room.cleaningStatus) {
-        await updateCleaningTaskStatus(room.cleaningStatus.id, status);
-        onRefresh();
+      try {
+        const updated = await patchLocationCleaning(roomId, { status });
         setSelectedRoom((prev) =>
-          prev
-            ? { ...prev, cleaningStatus: { ...prev.cleaningStatus!, status } }
-            : null,
+          prev ? { ...prev, cleaningStatus: updated } : null,
         );
+        onRefresh();
+      } catch (error) {
+        console.error("Failed to update cleaning status", error);
+        throw error;
       }
     },
-    [rooms, onRefresh],
+    [onRefresh],
   );
 
   const handleAssignUser = useCallback(
     async (roomId: number, userId: number) => {
-      const room = rooms.find((r) => r.id === roomId);
-      if (room && room.cleaningStatus) {
-        await assignWorkerToTask(room.cleaningStatus.id, userId);
-        onRefresh();
+      try {
+        const updated = await patchLocationCleaning(roomId, {
+          assignedToId: userId,
+        });
         setSelectedRoom((prev) =>
-          prev
-            ? {
-                ...prev,
-                cleaningStatus: {
-                  ...prev.cleaningStatus!,
-                  assignedToId: userId,
-                },
-              }
-            : null,
+          prev ? { ...prev, cleaningStatus: updated } : null,
         );
+        onRefresh();
+      } catch (error) {
+        console.error("Failed to assign cleaner", error);
+        throw error;
       }
     },
-    [rooms, onRefresh],
+    [onRefresh],
   );
 
-  const handleCreateCall = useCallback((room: CleaningRoom) => {
-    setRoomForCall(room);
-    setIsAddCallOpen(true);
-  }, []);
-
-  const handleCallCreated = useCallback(() => {
-    setIsAddCallOpen(false);
-    setRoomForCall(null);
-  }, []);
-
   if (isLoading) {
-    return <CleaningBoardSkeleton />;
+    return (
+      <>
+        <CleaningBoardSkeleton />
+        <CleaningDetailsDrawer
+          isOpen={!!selectedRoom}
+          onClose={() => setSelectedRoom(null)}
+          room={selectedRoom}
+          users={allUsers}
+          onStatusChange={handleStatusChange}
+          onAssignUser={handleAssignUser}
+          onRefresh={onRefresh}
+        />
+      </>
+    );
   }
 
   return (
@@ -158,34 +155,8 @@ export const CleaningBoard = ({
         users={allUsers}
         onStatusChange={handleStatusChange}
         onAssignUser={handleAssignUser}
-        onCreateCall={handleCreateCall}
+        onRefresh={onRefresh}
       />
-
-      {/* Add Call Dialog */}
-      {isAddCallOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-background rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-2 top-2 z-10"
-              onClick={() => setIsAddCallOpen(false)}
-            >
-              <Plus className="rotate-45" />
-            </Button>
-            <div className="p-6">
-              <h2 className="text-xl font-bold mb-4">
-                {t("create_call_for_room")} {roomForCall?.roomNumber}
-              </h2>
-              <AddCall
-                defaultLocationId={roomForCall?.id}
-                onSuccess={handleCallCreated}
-                onCancel={() => setIsAddCallOpen(false)}
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

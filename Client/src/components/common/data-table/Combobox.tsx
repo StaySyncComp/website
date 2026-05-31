@@ -16,6 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useRTL } from "@/hooks/useRtl";
+import { useNestedOverlayContainer } from "@/contexts/nestedOverlayContext";
 
 interface ComboboxOption {
   value: string;
@@ -48,6 +49,7 @@ export function Combobox({
   disabled = false,
 }: ComboboxProps) {
   const { textAlign, isRtl } = useRTL();
+  const nestedOverlayContainer = useNestedOverlayContainer();
   const [open, setOpen] = React.useState(false);
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -109,10 +111,26 @@ export function Combobox({
   const isSelected = (optionValue: string) =>
     selectedValues.includes(optionValue);
 
+  const preventNestedDismiss = (event: Event) => {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    if (
+      target.closest('[role="combobox"]') ||
+      target.closest("[data-radix-popper-content-wrapper]") ||
+      target.closest("[cmdk-input-wrapper]") ||
+      target.closest("[cmdk-list]") ||
+      nestedOverlayContainer?.contains(target)
+    ) {
+      event.preventDefault();
+    }
+  };
+
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
+          type="button"
           variant="outline"
           role="combobox"
           aria-expanded={open}
@@ -187,15 +205,22 @@ export function Combobox({
 
       {!disabled && (
         <PopoverContent
+          container={nestedOverlayContainer ?? undefined}
           className={cn(
             "w-[var(--radix-popover-trigger-width)] p-0 border-2 border-gray-200 rounded-xl shadow-2xl bg-white/95 backdrop-blur-md animate-in fade-in-0 zoom-in-95 slide-in-from-top-2",
+            nestedOverlayContainer && "z-[70]",
             popoverClassName,
           )}
           align="start"
+          onOpenAutoFocus={(event) => event.preventDefault()}
+          onCloseAutoFocus={(event) => event.preventDefault()}
+          onFocusOutside={preventNestedDismiss}
+          onPointerDownOutside={preventNestedDismiss}
+          onInteractOutside={preventNestedDismiss}
         >
           <Command className="rounded-xl">
             <CommandInput placeholder={searchPlaceholder} />
-            <CommandList className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+            <CommandList className="max-h-64 overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
               <CommandEmpty className="py-8 text-center text-sm text-gray-500 font-medium">
                 לא נמצאו תוצאות
               </CommandEmpty>
@@ -203,7 +228,7 @@ export function Combobox({
                 {options.map((option) => (
                   <CommandItem
                     key={option.value}
-                    value={option.value}
+                    value={`${option.label} ${option.value}`}
                     onSelect={() => handleSelect(option.value)}
                     className="relative px-4 py-3 text-sm font-medium cursor-pointer rounded-lg mb-1 last:mb-0 transition-all duration-150 ease-in-out"
                   >

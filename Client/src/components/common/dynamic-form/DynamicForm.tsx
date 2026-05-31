@@ -54,6 +54,10 @@ interface DynamicFormProps {
   onSubmit: (data: any) => void;
   headerKey?: string;
   extraButtons?: React.ReactNode;
+  hideHeader?: boolean;
+  formClassName?: string;
+  submitClassName?: string;
+  submitLabel?: string;
 }
 
 const DynamicForm: React.FC<DynamicFormProps> = ({
@@ -64,6 +68,10 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
   onSubmit,
   headerKey = "",
   extraButtons,
+  hideHeader = false,
+  formClassName,
+  submitClassName,
+  submitLabel,
 }) => {
   const { t } = useTranslation();
   const [preview, setPreview] = useState<string | null>(null);
@@ -74,7 +82,6 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     watch,
     control,
     reset,
-    getValues,
     formState: { errors, isSubmitting, isDirty },
   } = useForm({
     resolver: zodResolver(validationSchema),
@@ -82,8 +89,6 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
     mode: "onChange",
     shouldUnregister: false,
   });
-  console.log(getValues(), "getValues");
-  console.log(defaultValues, "defaultValues");
 
   const imageField = fields.find((f) => f.type === "image");
   const imageFieldName = imageField?.name;
@@ -254,13 +259,15 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
   return (
     <form
       onSubmit={handleSubmit(handleDynamicSubmit(onSubmit))}
-      className="flex flex-col gap-4 bg-surface px-8 py-6 rounded-lg"
+      className={formClassName ?? "flex flex-col gap-4 bg-surface px-8 py-6 rounded-lg"}
     >
-      <h2 className="text-base font-semibold text-accent rtl:text-right ltr:text-left">
-        {mode === "edit"
-          ? t("editing_x", { x: t(headerKey) })
-          : t("add_x", { x: t(headerKey) })}
-      </h2>
+      {!hideHeader && (
+        <h2 className="text-base font-semibold text-accent rtl:text-right ltr:text-left">
+          {mode === "edit"
+            ? t("editing_x", { x: t(headerKey) })
+            : t("add_x", { x: t(headerKey) })}
+        </h2>
+      )}
 
       <div className="flex gap-6 flex-wrap">
         {/* Image Section */}
@@ -288,7 +295,11 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
                 f.type !== "language" &&
                 f.type !== "icon-select",
             )
-            .map(renderField)}
+            .map((field) => (
+              <div key={field.name} className="contents">
+                {renderField(field)}
+              </div>
+            ))}
         </div>
       </div>
 
@@ -299,9 +310,12 @@ const DynamicForm: React.FC<DynamicFormProps> = ({
           type="submit"
           loading={isSubmitting}
           disabled={isSubmitting || !isDirty}
-          className="w-fit px-8 text-surface hover:text-surface"
+          className={
+            submitClassName ??
+            "w-fit px-8 text-surface hover:text-surface"
+          }
         >
-          {t(mode === "create" ? "create" : "save")}
+          {submitLabel ?? t(mode === "create" ? "create" : "save")}
         </Button>
       </div>
     </form>
