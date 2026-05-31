@@ -75,29 +75,45 @@ export function SideStatsCard({
           <span className="sr-only">Close</span>
         </DialogClose>
 
-        <div className="grid grid-cols-1 md:grid-cols-[30%_70%] h-full">
-          {/* Left Side - Same as Card */}
-          <div className="h-full bg-white flex flex-col overflow-y-auto border-r border-slate-100 pt-12">
-            <CallStatsContent
-              call={call}
-              users={users}
-              isExpanded={true}
-              // In expanded mode, we might want to hide the expand button or show something else
-              headerAction={null}
-            />
-          </div>
-
-          {/* Right Side - Chat */}
-          <div className="h-full bg-slate-50 flex flex-col overflow-hidden pt-12">
-            <CallChat
-              callId={parseInt(call.id)}
-              callStatusHistory={call.CallStatusHistory || []}
-              className="flex-1 h-auto border-none shadow-none rounded-none bg-transparent"
-            />
-          </div>
-        </div>
+        <CallDetailsWithChat call={call} users={users} className="h-full pt-12" />
       </DialogContent>
     </Dialog>
+  );
+}
+
+export function CallDetailsWithChat({
+  call,
+  users,
+  className,
+}: {
+  call: Call;
+  users: User[];
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "grid grid-cols-1 md:grid-cols-[30%_70%] h-full min-h-0",
+        className,
+      )}
+    >
+      <div className="h-full bg-white flex flex-col overflow-y-auto border-r border-slate-100">
+        <CallStatsContent
+          call={call}
+          users={users}
+          isExpanded={true}
+          headerAction={null}
+        />
+      </div>
+
+      <div className="h-full bg-slate-50 flex flex-col overflow-hidden min-h-0">
+        <CallChat
+          callId={parseInt(call.id)}
+          callStatusHistory={call.CallStatusHistory || []}
+          className="flex-1 h-auto border-none shadow-none rounded-none bg-transparent"
+        />
+      </div>
+    </div>
   );
 }
 

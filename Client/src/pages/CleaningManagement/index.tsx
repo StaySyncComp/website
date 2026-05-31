@@ -14,7 +14,7 @@ export default function CleaningManagement() {
   // Fetch data using custom hooks
   const { locations, isLocationsLoading } = useLocations();
   const { areas, isAreasLoading } = useAreas();
-  const { cleaningStates, isStatesLoading, fetchStates } = useCleaningStates();
+  const { cleaningStates, isInitialLoading, fetchStates } = useCleaningStates();
 
   // Merge data into rooms
   const { rooms } = useCleaningRooms({
@@ -23,8 +23,8 @@ export default function CleaningManagement() {
     cleaningStates,
   });
 
-  // Combine loading states
-  const isLoading = isStatesLoading || isLocationsLoading || isAreasLoading;
+  const isLoading =
+    isInitialLoading || isLocationsLoading || isAreasLoading;
 
   return (
     <div className="flex flex-col min-h-full p-6 space-y-6">

@@ -1,47 +1,43 @@
-import { useState, useEffect } from "react";
-import {
-  fetchAllCleaningStates,
-  initializeMockData,
-} from "@/features/cleaning/api";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { fetchAllCleaningStates } from "@/features/cleaning/api";
+import { CleaningTask } from "@/features/cleaning/types";
 
 /**
- * Custom hook to manage cleaning states data fetching
+ * Fetches all room cleaning states for the current organization.
+ * Server auto-initializes missing states on GET /cleaning.
+ * Refetches are silent so open modals/overlays are not unmounted.
  */
 export const useCleaningStates = () => {
-  const [cleaningStates, setCleaningStates] = useState<any[]>([]);
-  const [isStatesLoading, setIsStatesLoading] = useState(true);
+  const [cleaningStates, setCleaningStates] = useState<CleaningTask[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const hasLoadedRef = useRef(false);
 
-  const fetchStates = async () => {
-    setIsStatesLoading(true);
+  const fetchStates = useCallback(async () => {
     setError(null);
+    if (!hasLoadedRef.current) {
+      setIsInitialLoading(true);
+    }
+
     try {
-      const statesResponse = await fetchAllCleaningStates();
-      let states = (statesResponse as any).data || [];
-
-      // If no states exist, initialize mock data and fetch again
-      if (Array.isArray(states) && states.length === 0) {
-        await initializeMockData();
-        const newStatesRes = await fetchAllCleaningStates();
-        states = (newStatesRes as any).data || [];
-      }
-
+      const states = await fetchAllCleaningStates();
       setCleaningStates(states);
+      hasLoadedRef.current = true;
     } catch (err) {
       console.error("Failed to load cleaning states", err);
       setError(err as Error);
     } finally {
-      setIsStatesLoading(false);
+      setIsInitialLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchStates();
-  }, []);
+  }, [fetchStates]);
 
   return {
     cleaningStates,
-    isStatesLoading,
+    isInitialLoading,
     fetchStates,
     error,
   };

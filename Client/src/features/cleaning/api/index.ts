@@ -1,52 +1,92 @@
-import { createApiService } from "@/lib/api-utils/apiFactory";
-import { CleaningTask, CleaningStatus } from "@/features/cleaning/types";
-import { RecurringCall } from "@/types/api/calls";
 import apiClient from "@/lib/api-client";
+import { getSelectedOrganization } from "@/lib/utils/hooks/UseOrganizationUtils";
+import { CleaningTask, CleaningStatus } from "@/features/cleaning/types";
 
-// Create a base service for cleaning states
-// The endpoint is /cleaning which matches our server route
-const cleaningApi = createApiService<CleaningTask>("/cleaning", {});
+export const mapServerCleaningToTask = (state: any): CleaningTask => ({
+  id: state.id,
+  locationId: state.locationId,
+  status: state.status as CleaningStatus,
+  assignedToId: state.assignedToId ?? undefined,
+  lastCleanedAt: state.lastCleanedAt ?? undefined,
+  priority: state.priority ?? "normal",
+  history: (state.history || []).map((entry: any) => ({
+    action: entry.action,
+    timestamp: entry.createdAt,
+    performerName: entry.performedBy?.name,
+  })),
+});
 
-export const fetchAllCleaningStates = async () => {
-  return cleaningApi.fetchAll({}, false);
+export const parseCleaningStatesResponse = (response: unknown): CleaningTask[] => {
+  let raw: unknown[] = [];
+
+  if (Array.isArray(response)) {
+    raw = response;
+  } else if (response && typeof response === "object" && "data" in response) {
+    const data = (response as { data: unknown }).data;
+    if (Array.isArray(data)) raw = data;
+  }
+
+  return raw.map(mapServerCleaningToTask);
 };
 
-export const getCleaningTaskForLocation = async (
+export const fetchAllCleaningStates = async (): Promise<CleaningTask[]> => {
+  const organizationId = getSelectedOrganization();
+  const { data } = await apiClient.get("/cleaning", {
+    params: { organizationId },
+  });
+  return parseCleaningStatesResponse(data);
+};
+
+export const fetchLocationCleaning = async (
   locationId: number,
+  organizationId: number,
 ): Promise<CleaningTask> => {
-  // This is a fallback if needed, but we should prefer fetching all.
-  // We can filter from all if we have a store, but for direct API usage:
-  // We don't have a direct "get by location id" endpoint, only get by state ID.
-  // For now, return a placeholder or throw.
-  // The frontend page is being refactored to not use this individually.
-  return {
-    id: 0,
-    locationId: locationId,
-    status: "dirty",
-    priority: "normal",
-    history: [],
-  } as CleaningTask;
+  const { data } = await apiClient.get(`/locations/${locationId}/cleaning`, {
+    params: { organizationId },
+  });
+  return mapServerCleaningToTask(data);
 };
 
+export const patchLocationCleaning = async (
+  locationId: number,
+  payload: {
+    status?: CleaningStatus;
+    assignedToId?: number | null;
+    organizationId?: number;
+  },
+): Promise<CleaningTask> => {
+  const organizationId =
+    payload.organizationId ?? getSelectedOrganization();
+  const { data } = await apiClient.patch(
+    `/locations/${locationId}/cleaning`,
+    { ...payload, organizationId },
+  );
+  return mapServerCleaningToTask(data);
+};
+
+/** @deprecated Prefer patchLocationCleaning — kept for backward compatibility */
 export const updateCleaningTaskStatus = async (
   stateId: number,
   status: CleaningStatus,
 ): Promise<CleaningTask> => {
-  // API expects { status: "..." }
-  // We pass id to update method
-  const res = await cleaningApi.update({ id: stateId, status } as any);
-  return res.data as CleaningTask;
+  const res = await apiClient.put(`/cleaning/${stateId}/status`, { status });
+  return mapServerCleaningToTask(res.data);
 };
 
+/** @deprecated Prefer patchLocationCleaning */
 export const assignWorkerToTask = async (
   stateId: number,
   userId: number,
 ): Promise<CleaningTask> => {
-  // PUT /cleaning/:id/assign
   const res = await apiClient.put(`/cleaning/${stateId}/assign`, { userId });
-  return res.data;
+  return mapServerCleaningToTask(res.data);
 };
 
-export const initializeMockData = async () => {
-  await apiClient.post("/cleaning/init");
+export const initializeCleaningStates = async (organizationId?: number) => {
+  await apiClient.post("/cleaning/init", {
+    organizationId: organizationId ?? getSelectedOrganization(),
+  });
 };
+
+/** @deprecated Use initializeCleaningStates */
+export const initializeMockData = initializeCleaningStates;

@@ -1,14 +1,15 @@
 import { useMemo } from "react";
-import { CleaningRoom } from "@/features/cleaning/types";
+import { CleaningRoom, CleaningTask } from "@/features/cleaning/types";
 
 interface UseCleaningRoomsProps {
   locations: any[] | null;
   areas: any[] | null;
-  cleaningStates: any[];
+  cleaningStates: CleaningTask[];
 }
 
 /**
- * Custom hook to merge locations, areas, and cleaning states into rooms
+ * Merges locations, areas, and cleaning states into rooms for the map grid.
+ * Cleaning status always comes from room_states (via GET /cleaning).
  */
 export const useCleaningRooms = ({
   locations,
@@ -21,13 +22,9 @@ export const useCleaningRooms = ({
     }
 
     return locations.map((location: any) => {
-      // Find matching cleaning state
-      const state = Array.isArray(cleaningStates)
-        ? cleaningStates.find((s: any) => s.locationId === location.id)
-        : null;
+      const state = cleaningStates.find((s) => s.locationId === location.id);
 
-      // Default cleaning status if not found
-      const cleaningStatus = state || {
+      const cleaningStatus: CleaningTask = state ?? {
         id: 0,
         locationId: location.id,
         status: "vacant_dirty",
@@ -35,7 +32,6 @@ export const useCleaningRooms = ({
         history: [],
       };
 
-      // Find area information
       const area = Array.isArray(areas)
         ? areas.find((a: any) => a.id === location.areaId)
         : null;
